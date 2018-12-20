@@ -163,14 +163,34 @@ func (s *subscriber) BufferTime(in <-chan interface{}) <-chan []interface{} {
 func (s *subscriber) BufferCount(in <-chan interface{}) <-chan []interface{} {
 	out := make(chan []interface{})
 
+	bufferTime := make(chan bool, 1)
+	go func() {
+		for {
+			select {
+			case <-time.After(1 * time.Second):
+				bufferTime <- true
+			case <-s.ctx.Done():
+				return
+			}
+		}
+	}()
+
 	go func() {
 		defer close(out)
 		var messages []interface{}
 		for msg := range in {
-			messages = append(messages, msg)
-			if len(messages) >= 100 {
-				out <- messages
-				messages = nil
+			select {
+			case <-bufferTime:
+				if len(messages) > 0 {
+					out <- messages
+					messages = nil
+				}
+			default:
+				messages = append(messages, msg)
+				if len(messages) >= 100 {
+					out <- messages
+					messages = nil
+				}
 			}
 		}
 	}()
