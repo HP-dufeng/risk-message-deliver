@@ -1,0 +1,1162 @@
+syntax = "proto3";
+
+package riskmonitorserver;
+
+// Interface exported by the server.
+service RiskMonitorServer 
+{ 
+  //转发到riskdataserver的查询请求
+  //实时资金查询
+  rpc QryRealFund(QryRealFundReq) returns (stream QryRealFundRsp) {}
+  
+  //强平客户信息查询
+  rpc QryForceCustInfo(QryForceCustInfoReq) returns (stream ForceCustInfoRsp) {}
+  
+  //客户持仓查询
+  rpc QryCustHold(QryCustHoldReq) returns (stream QryCustHoldRsp) {}
+  
+  //客户委托信息查询
+  rpc QrySingleCustEntrust(QrySingleCustEntrustReq) returns (stream QrySingleCustEntrustRsp) {} 
+  
+  //根据合约查询持仓客户列表
+  rpc QryHoldCustsByContract(QryHoldCustsByContractReq) returns (QryHoldCustsByContractRsp) {}  
+  
+  //可以本地缓存处理的查询请求
+  //客户信息查询
+  rpc QryCustSimpleInfo(QryCustSimpleInfoReq) returns (stream QryCustSimpleInfoRsp) {}
+  
+  //交易所对应品种查询
+  rpc QryExchVari(QryExchVariReq) returns (stream QryExchVariRsp) {}  
+  
+  //合约查询
+  rpc QryContract(QryContractReq) returns (stream QryContractRsp) {}  
+  
+  //订阅监控类请求
+   //订阅通道资金
+  rpc SubscribeTunnelRealFund(SubscribeReq) returns (stream TunnelRealFundRtn) {}
+  
+  //订阅公司持仓监控
+  rpc SubscribeCorpHoldMon(SubscribeReq) returns (stream CorpHoldMonRtn) {}
+  
+  //订阅行情监控
+  rpc SubscribeQuoteMon(SubscribeReq) returns (stream QuoteMonRtn) {}
+  
+  //订阅风险客户推送
+  rpc SubscribeCustRisk(SubscribeReq) returns (stream CustRiskRtn) {}
+  
+  //订阅客户持仓推送
+  rpc SubscribeCustHold(SubscribeReq) returns (stream CustHoldRtn) {}
+  
+  //订阅客户组持仓推送
+  rpc SubscribeCustGroupHold(SubscribeReq) returns (stream CustGroupHoldRtn) {}
+
+   //订阅临近交易日持仓推送
+  rpc SubscribeNearDediveHold(SubscribeReq) returns (stream NearDediveHoldRtn) {}
+  
+   //订阅商品组风险推送
+  rpc SubscribeProuctGroupRisk(SubscribeReq) returns (stream ProuctGroupRiskRtn) {}
+  
+  //风险监控配置项交互接口
+  //设置风险合约级别
+  rpc SetRiskContrLevel(stream RiskContrLevelSetting) returns (RspInfo) {}
+
+  //设置合约组
+  rpc SetContrGroup(stream ContrGroupSetting) returns (RspInfo) {}
+  
+  //设置客户组
+  rpc SetCustGroup(stream CustGroupSetting) returns (RspInfo) {}
+  
+  //设置客户风险监控
+  rpc SetCustRiskMonitor(stream CustRiskMonitorSetting) returns (RspInfo) {}
+  
+  //设置行情监控
+  rpc SetQuoteMonitor(stream QuoteMonitorSetting) returns (RspInfo) {}
+  
+  //商品组监控监控
+  rpc SetProductGroupMonitor(stream ProductGroupMonitorSetting) returns (RspInfo) {}
+  
+  //设置公司持仓监控
+  rpc SetCorpHoldMonitor(stream CorpHoldMonitorSetting) returns (RspInfo) {}  
+
+  //设置客户持仓监控
+  rpc SetCustHoldMonitor(stream CustHoldMonitorSetting) returns (RspInfo) {}  
+
+  //设置客户组持仓监控
+  rpc SetCustGroupHoldMonitor(stream CustGroupHoldMonitorSetting) returns (RspInfo) {}  
+
+  //设置临近交易日持仓监控
+  rpc SetNearDediveHoldMonitor(stream NearDediveHoldMonitorSetting) returns (RspInfo) {}  
+
+  //设置限仓规则
+  rpc SetHoldLimit(stream HoldLimitSetting) returns (RspInfo) {}
+
+  //设置保证金规则
+  rpc SetMarginLimit(stream MarginLimitSetting) returns (RspInfo) {}
+
+  //查询交易日历
+  rpc QryTradeCalendar(QryTradeCalendarReq) returns (QryTradeCalendarRsp) {}
+
+  //设置套利限仓规则
+  rpc SetArbitrageLimit(stream ArbitrageLimitSetting) returns (RspInfo) {}
+
+  //设置提前预警时间
+  rpc SetEarlyWrningTime(stream EarlyWrningTimeSetting) returns (RspInfo) {}
+
+  //设置提前预警值
+  rpc SetEarlyWrningValue(stream EarlyWrningValueSetting) returns (RspInfo) {}
+
+  //设置临近交割规则
+  rpc SetNearDedive(stream NearDediveSetting) returns (RspInfo) {}
+
+  //心跳请求
+  rpc HeartBeatReq(HeartBeat) returns (HeartBeat) {}  
+
+  //设置品种限仓规则
+  rpc SetVariHoldLimit(stream VariHoldLimitSetting) returns (RspInfo) {}
+
+  //设置品种保证金规则
+  rpc SetVariMarginLimit(stream VariMarginLimitSetting) returns (RspInfo) {}
+
+  //设置品种套利限仓规则
+  rpc SetVariArbitrageLimit(stream VariArbitrageLimitSetting) returns (RspInfo) {}
+}
+
+//心跳包
+message HeartBeat
+{
+}
+
+//订阅请求
+message SubscribeReq
+{
+//	uint32	topic 						= 1;	//订阅主题
+}
+
+//订阅请求
+message QryReq
+{
+//	uint32	topic 						= 1;	//查询主题
+}
+
+//返回信息
+message RspInfo
+{
+  uint32	errid 						= 1;	//错误码
+  bytes		errmsg						= 2;    //错误内容
+}
+
+//值比较配置项
+message SettingValueField
+{
+  bytes		name 						= 1;	//字段名称
+  uint32	operator					= 2;    //比较操作  "="1 ，"<"2,">"3,"<="4,">="5,"!="6
+  bytes     value						= 3;    //阈值
+}
+
+message QryHoldCustsByContractReq
+{
+  bytes 	contract_code 				= 1;	//合约号	
+}
+
+message QryHoldCustsByContractRsp
+{
+  repeated	bytes 	cust_nos		 	= 1;	//客户号列表 
+  RspInfo			rspInfo				= 2;	//返回信息
+}
+
+message QryTradeCalendarReq
+{
+  bytes 	year 				= 1;	//交易年份	
+}
+
+message QryTradeCalendarRsp
+{
+  bytes 			calendar		 	= 1;	//交易日历json 
+  RspInfo			rspInfo				= 2;	//返回信息
+}
+
+//行情监控推送
+message QuoteMonRtn
+{
+  uint32	pack_flag          			= 1;    //首尾包标志
+  uint32	action_flag					= 2;	//操作标志 1增改 2删除
+  bytes		monitor_no					= 3;	//监控编号
+  bytes 	smarket_code		 		= 4;	//市场代码 
+  bytes 	sec_code 					= 5;	//品种代码 
+  bytes 	contract_code 				= 6;	//合约号
+  bytes 	trade_type					= 7;	//交易类型
+  double	last_price					= 8;  	//最新价
+  double	pre_settlement_price		= 9;	//昨日结算价
+  double	settlement_price			= 10;	//今日结算价
+  double	rf_limit_price				= 11;	//涨跌停板
+  double	chg							= 12;	//涨跌幅
+  int32 	risk_level 					= 13;	//合约风险级别
+  uint32	open_interest				= 14;	//双边总持仓
+  double 	min_margin		 			= 15;	//当前最低保证金
+  double 	margin_ratio		 		= 16;	//持仓量导致的保证金费率
+  double 	margin_diff		 			= 17;	//保证金差额
+  uint32	tick_price_num				= 18;	//剩余跳数
+}
+
+//风险客户推送
+message CustRiskRtn 
+{
+  uint32	pack_flag          			= 1;    //首尾包标志
+  uint32	action_flag					= 2;	//操作标志 1增改 2删除
+  bytes		monitor_no					= 3;	//监控编号
+  bytes 	cust_no		 				= 4;	//客户号
+  bytes 	cust_class 					= 5;	//客户类
+  bytes 	cust_name 					= 6;	//客户简称 
+  bytes 	mobile_phone 				= 7;	//手机号码 
+  bytes 	clientmode 					= 8;	//客户类型(客户模式)
+  bytes 	risk_level 					= 9;	//风险级别
+  double 	risk_degree0				= 10;	//风险度0
+  double 	risk_degree1				= 11;	//风险度1
+  double 	risk_degree2				= 12;	//风险度2
+  double 	risk_degree3				= 13;	//风险度3
+  bytes 	last_risk_level 			= 14;	//昨日风险级别 
+  double 	last_remain	 				= 15;	//昨保证金余额(上日结存)
+  double 	margin		 				= 16;	//保证金  
+  double 	drop_profit					= 17;	//平仓盈亏
+  double 	hold_profit					= 18;	//浮动盈亏
+  double 	today_inout	 				= 19;	//今日出入金
+  double 	royalty_inout 				= 20;	//权利金收支 
+  double 	dyn_cap_right 				= 21;	//动态市值权益
+  double 	exch_margin 				= 22;	//交易所保证金 
+  double 	avail_fund 					= 23;	//可用资金
+  double 	option_cap					= 24;	//期权市值
+  double 	dyn_rights 					= 25;	//动态权益
+  double 	option_dyn_margin 			= 26;	//浮动保证金 
+  double 	frzn_margin					= 27;	//冻结保证金
+  double 	frzn_royalty 				= 28;	//冻结权利金
+  double 	exch_frzn_margin	 		= 29;	//交易所冻结保证金
+  double 	frzn_strike_margin 			= 30;	//行权冻结资金(执行冻结)
+  double 	option_now_margin 			= 31;	//实时价格保证金  
+  double 	exch_option_now_margin		= 32;	//交易所实时价格保证金
+  double 	exch_option_dyn_margin		= 33;	//交易所浮动保证金
+  uint32 	risk_contract_qty			= 34;	//风险合约手数
+  bytes 	currency_code 				= 35;	//币种
+  bytes 	trading_no					= 36;	//客户当前所属交易中心代码
+  double 	dyn_ratio					= 37;	//浮动盈亏权益比(浮动盈亏/动态权益)
+}
+
+//客户持仓推送
+message CustHoldRtn
+{
+  enum HoldType
+  {	
+	Total				= 0;	//总持仓
+	Speculate			= 1;	//投机仓
+  }
+  uint32	pack_flag          			= 1;    //首尾包标志
+  uint32	action_flag					= 2;	//操作标志 1增改 2删除
+  bytes		monitor_no					= 3;	//监控编号
+  bytes 	cust_no		 				= 4;	//客户号
+  bytes 	cust_class 					= 5;	//客户类   
+  bytes 	exch_code		 			= 6;	//交易所代码
+  bytes 	vari_code 					= 7;	//品种代码 
+  bytes 	contract_code 				= 8;	//合约号
+  bytes 	deliv_date 					= 9;	//交割期  
+  uint32    hold_sum					= 10;	//持仓量
+  bytes 	trade_type					= 11;	//交易类型
+  bytes 	cp_flag						= 12;	//合约类型
+  bytes 	month_flag					= 13;	//月份划分
+  double 	limit_ratio					= 14;	//限仓比例
+  uint32    limit_volmue				= 15;   //限仓手数
+  uint32 	over_volume					= 16;	//超仓量(持仓量-限仓量)
+  uint32 	limit_wrning				= 17;	//限仓预警值
+  uint32 	over_wrning					= 18;	//超预警持仓量
+  HoldType  hold_type					= 19;	//持仓类型
+}
+
+//客户组持仓推送
+message CustGroupHoldRtn
+{
+  enum HoldType
+  {	
+	Total				= 0;	//总持仓
+	Speculate			= 1;	//投机仓
+  }
+  uint32	pack_flag          			= 1;    //首尾包标志
+  uint32	action_flag					= 2;	//操作标志 1增改 2删除
+  bytes		monitor_no					= 3;	//监控编号
+  bytes 	cust_group_no		 		= 4;	//客户组编号
+  bytes 	cust_group_name 			= 5;	//客户组名称   
+  bytes 	exch_code		 			= 6;	//交易所代码
+  bytes 	vari_code 					= 7;	//品种代码 
+  bytes 	contract_code 				= 8;	//合约号
+  bytes 	deliv_date 					= 9;	//交割期  
+  uint32    hold_sum					= 10;	//持仓量
+  bytes 	trade_type					= 11;	//交易类型
+  bytes 	cp_flag						= 12;	//合约类型
+  bytes 	month_flag					= 13;	//月份划分
+  double 	limit_ratio					= 14;	//限仓比例
+  uint32    limit_volmue				= 15;   //限仓手数
+  uint32 	over_volume					= 16;	//超仓量(持仓量-限仓量)
+  uint32 	limit_wrning				= 17;	//限仓预警值
+  uint32 	over_wrning					= 18;	//超预警持仓量
+  HoldType  hold_type					= 19;	//持仓类型
+ //客户持仓明细
+  bytes 	cust_no		 				= 20;	//客户号
+  bytes 	cust_class 					= 21;	//客户类  
+  uint32    cust_hold_sum				= 22;	//客户持仓量
+ }
+
+ //临近最后交易日持仓监控推送
+message NearDediveHoldRtn
+{
+  uint32	pack_flag          			= 1;    //首尾包标志
+  uint32	action_flag					= 2;	//操作标志 1增改 2删除
+  bytes		monitor_no					= 3;	//监控编号
+  bytes 	cust_no		 				= 4;	//客户号
+  bytes 	cust_class 					= 5;	//客户类   
+  bytes 	exch_code		 			= 6;	//交易所代码
+  bytes 	vari_code 					= 7;	//品种代码 
+  bytes 	contract_code 				= 8;	//合约号
+  bytes 	deliv_date 					= 9;	//交割期  
+  uint32    hold_sum					= 10;	//总持仓量
+  bytes 	trade_type					= 11;	//交易类型
+  bytes 	cp_flag						= 12;	//合约类型
+  uint32 	expire_days					= 13;	//距离交割月交易日数 后台设置距离交易日多少日开始进行提醒
+  uint32 	limit_base					= 14;	//限仓基数(设置的)
+  uint32    close_days					= 15;	//距离自然人最后平仓交易日数 后台设置距离交易日多少日开始进行提醒
+}
+
+//商品组风险推送
+message ProuctGroupRiskRtn
+{
+  uint32	pack_flag          			= 1;    //首尾包标志
+  uint32	action_flag					= 2;	//操作标志 1增改 2删除
+  bytes		monitor_no					= 3;	//监控编号
+  bytes 	product_group_no		 	= 4;	//合约组编号
+  bytes 	product_group_name 			= 5;	//合约组名称   
+  uint32 	count		 				= 6;	//合约组合约数
+  uint32 	risk_count 					= 7;	//合约组风险合约数
+  double 	risk_degree 				= 8;	//合约组风险度(合约组风险合约数/合约组合约数)
+  
+  bytes 	smarket_code		 		= 9;	//市场代码 
+  bytes 	sec_code 					= 10;	//品种代码 
+  bytes 	contract_code 				= 11;	//合约号
+  bytes 	trade_type					= 12;	//交易类型
+  double	last_price					= 13;  	//最新价
+  double	pre_settlement_price		= 14;	//昨日结算价
+  double	settlement_price			= 15;	//今日结算价
+  double	rf_limit_price				= 16;	//涨跌停板
+  double	chg							= 17;	//涨跌幅
+  int32 	risk_level 					= 18;	//合约风险级别
+  uint32	open_interest				= 19;	//双边总持仓
+  double 	min_margin		 			= 20;	//当前最低保证金
+  double 	margin_ratio		 		= 21;	//持仓量导致的保证金费率
+  double 	margin_diff		 			= 22;	//保证金差额
+  uint32	tick_price_num				= 23;	//剩余跳数
+}
+
+//客户信息查询请求
+message QryCustSimpleInfoReq
+{
+  bytes 	cust_no		 				= 1;	//客户号
+  bytes 	cust_class 					= 2;	//客户类
+  bytes 	cust_status	 				= 3;	//客户状态
+  bytes 	cust_name 					= 4;	//客户简称  
+}
+
+//客户信息查询应答
+message QryCustSimpleInfoRsp 
+{
+  enum ClientType
+  {
+		NATURAL				= 0;	//自然人
+		LEGAL				= 1;	//法人
+  }
+  RspInfo		rspInfo						= 1;	//返回信息
+  uint32		pack_flag         			= 2;    //首尾包标志
+  bytes 		cust_no		 				= 3;	//客户号
+  bytes 		cust_class 					= 4;	//客户类
+  bytes 		cust_status	 				= 5;	//客户状态
+  bytes 		cust_name 					= 6;	//客户简称  
+  bytes 		phone		 				= 7;	//电话
+  bytes 		fax		 					= 8;	//传真
+  bytes 		addr	 					= 9;	//地址
+  bytes 		cmd_assign1 				= 10;	//指令下达人1  
+  bytes 		fund_allot1					= 11;	//资金调拨人1
+  bytes 		email		 				= 12;	//邮件地址
+  bytes 		cmd_assign2	 				= 13;	//指令下达人2
+  bytes 		mobile_phone 				= 14;	//手机号码
+  bytes 		clientmode 					= 15;	//客户模式
+  ClientType	client_type					= 16;	//客户类型
+}
+
+//实时资金查询请求
+message QryRealFundReq 
+{
+  bytes 	cust_no		 				= 1;	//客户号
+  bytes 	currency_code	 			= 2;	//币种
+}
+
+//实时资金查询应答
+message QryRealFundRsp 
+{
+  uint32	pack_flag          			= 1;    //首尾包标志
+  bytes 	cust_no		 				= 2;	//客户号
+  bytes 	cust_name 					= 3;	//客户简称  
+  bytes 	currency_code 				= 4;	//币种 
+  bytes 	fund_account_no 			= 5;	//资金帐号 
+  double 	last_remain	 				= 6;	//上日结存
+  double 	avail_fund 					= 7;	//可用资金 
+  double 	b_entrust_frzn 				= 8;	//买冻结保证金
+  double 	s_entrust_frzn 				= 9;	//卖冻结保证金
+  double 	commi						= 10;	//手续费
+  double 	b_margin 					= 11;	//买保证金
+  double 	s_margin 					= 12;	//卖保证金
+  double 	drop_profit					= 13;	//平仓盈亏
+  double 	hold_profit					= 14;	//浮动盈亏
+  double 	way_money					= 15;	//在途资金 
+  double 	undeliv_profit				= 16;	//未交割平仓盈亏  
+  double 	dyn_rights 					= 17;	//动态权益
+  double 	today_inout	 				= 18;	//今日出入金
+  double 	total_frzn	 				= 19;	//总冻结 
+  double 	margin		 				= 20;	//持仓保证金  
+  double 	exch_margin 				= 21;	//交易所保证金 
+  double 	pledge_amt 					= 22;	//质押金额  
+  double 	credit_amt 					= 23;	//信用金额 
+  double 	risk_degree0				= 24;	//风险度0 
+  double 	risk_degree1				= 25;	//风险度1
+  double 	risk_degree2				= 26;	//风险度2
+  double 	risk_degree3				= 27;	//风险度3
+  double 	risk_degree4				= 28;	//风险度4
+  bytes 	risk_level 					= 29;	//风险级别
+  double 	frzn_commi 					= 30;	//冻结手续费
+  double 	currency_in 				= 31;	//实体账户货币质入
+  double 	currency_out 				= 32;	//实体账户货币质出  
+  double 	initial_fund 				= 33;	//日初质押资金   
+  double 	pledge_balance 				= 34;	//质押余额
+  double 	borrow_amt 					= 35;	//借用资金
+  double 	lend_amt 					= 36;	//借出资金
+  double 	spec_total_frzn 			= 37;	//特定品种总冻结
+  double 	spec_b_entrust_frzn 		= 38;	//特定品种买冻结保证金
+  double 	spec_s_entrust_frzn 		= 39;	//特定品种卖冻结保证金
+  double 	spec_b_margin 				= 40;	//特定品种买持仓保证金
+  double 	spec_s_margin 				= 41;	//特定品种卖持仓保证金  
+  double 	spec_margin 				= 42;	//特定品种持仓保证金   
+  double 	spec_exch_margin 			= 43;	//特定品种交易所保证金
+  double 	spec_frzn_commi 			= 44;	//特定品种冻结手续费
+  double 	spec_commi 					= 45;	//特定品种手续费
+  double 	spec_drop_profit 			= 46;	//特定品种平仓盈亏  
+  double 	spec_hold_profit 			= 47;	//特定品种浮动盈亏
+  double 	pledge_currency_in 			= 48;	//质押账户货币质入
+  double 	pledge_currency_out 		= 49;	//质押账户货币质出
+  double 	margin_discount 			= 50;	//优惠保证金  
+  double 	royalty_in 					= 51;	//普通品种权利金收入   
+  double 	royalty_out 				= 52;	//普通品种权利金支出
+  double 	frzn_royalty 				= 53;	//普通品种冻结权利金
+  double 	strike_frzn_margin 			= 54;	//普通品种执行冻结保证金
+  double 	option_cap 					= 55;	//普通品种期权市值
+  double 	dyn_cap_right 				= 56;	//动态市值权益
+  double 	royalty_inout 				= 57;	//权利金收支
+  double 	option_dyn_margin 			= 58;	//浮动保证金  
+  double 	exch_dyn_margin				= 59;	//交易所浮动保证金  
+  double 	b_frzn_exch_margin 			= 60;	//交易所买冻结  
+  double 	s_frzn_exch_margin			= 61;	//交易所卖冻结
+  double 	now_margin 					= 62;	//实时价格保证金
+  double 	exch_now_margin 			= 63;	//交易所实时价格保证金  
+  double 	strike_frzn_fund			= 64;	//行权冻结净付资金
+  double 	strike_frzn_other_commi 	= 65;	//行权冻结其他费用
+  double 	ini_total_frzn 				= 66;	//初始总冻结
+  bytes 	account_status 				= 67;	//资金账号状态  
+  bytes 	fund_status 				= 68;	//资金状态  
+  bytes 	trade_status 				= 69;	//交易状态  
+  double 	hold_profit_op				= 70;	//期权浮动盈亏
+  double 	op_drop_profit	 			= 71;	//期权平仓盈亏
+  double 	yest_pledge_frzn_amt 		= 72;	//上日货币质押冻结金额
+  double 	t_remain_swap_limit 		= 73;	//T日剩余换汇额度
+  double 	t1_risk_fund_frzn 			= 74;	//T1日风险资金冻结
+  double 	money_plege_amt 			= 75;	//货币质押金额
+  RspInfo   rspInfo						= 76;	//返回信息
+}
+
+//通道资金推送
+message TunnelRealFundRtn 
+{
+  uint32	pack_flag          			= 1;    //首尾包标志
+  uint32	action_flag					= 2;	//操作标志 1增改 2删除
+  bytes		monitor_no					= 3;	//监控编号
+  bytes 	tunnel_code		 			= 4;	//通道代码 
+  bytes 	currency_code 				= 5;	//币种 
+  double 	avail_margin_balance	 	= 6;	//可用保证金余额
+  double 	today_margin_balance 		= 7;	//今日保证金余额 
+  double 	occupied_margin 			= 8;	//已占用保证金
+  double 	margin_occupied_rate		= 9;	//保证金已占用比例
+}
+
+//公司持仓监控推送
+message CorpHoldMonRtn 
+{
+  uint32	pack_flag          			= 1;    //首尾包标志
+  uint32	action_flag					= 2;	//操作标志 1增改 2删除
+  bytes		monitor_no					= 3;	//监控编号
+  bytes 	smarket_code		 		= 4;	//市场代码 
+  bytes 	sec_code 					= 5;	//品种代码 
+  bytes 	sec_name	 				= 6;	//品种名称
+  bytes 	contract_code 				= 7;	//合约号
+  bytes 	direction_type 				= 8;	//方向 
+  uint32 	hold_qty 					= 9;	//数量
+  double 	hold_rate					= 10;	//占用比率
+  uint32	market_hold_qty				= 11;	//市场双边持仓量
+}
+
+//客户持仓查询请求
+message QryCustHoldReq 
+{
+  bytes 	cust_no		 				= 1;	//客户号
+  bytes 	contract_code		 		= 2;	//合约号
+  bytes 	query_hold_flag		 		= 3;	//持仓查询标志
+}
+
+//客户持仓查询应答
+message QryCustHoldRsp 
+{
+  uint32	pack_flag          			= 1;    //首尾包标志
+  bytes 	cust_no		 				= 2;	//客户号
+  bytes 	cust_class 					= 3;	//客户类
+  bytes 	cust_name 					= 4;	//客户简称  
+  bytes 	tx_date 					= 5;	//交易日期    
+  bytes 	exch_code		 			= 6;	//交易所代码
+  bytes 	vari_code 					= 7;	//品种代码
+  bytes 	contract_code 				= 8;	//合约号
+  bytes 	deliv_date 					= 9;	//交割期  
+  bytes 	sh_flag		 				= 10;	//投保标记
+  bytes 	bs_flag 					= 11;	//买卖方向
+  uint32 	hold_b_sum 					= 12;	//总买  
+  uint32 	hold_b_today_sum 			= 13;	//今买    
+  double 	hold_b_avg_price		 	= 14;	//买持仓均价(spec_hold_avg_price)
+  double 	hold_profit 				= 15;	//浮动盈亏
+  double 	hold_s_avg_price 			= 16;	//卖持仓均价(spec_open_avg_price)
+  uint32 	hands						= 17;	//每手数量
+  double 	new_price					= 18;	//最新价
+  uint32 	hold_s_sum					= 19;	//总卖
+  uint32 	hold_s_today_sum			= 20;	//今卖
+  double 	b_margin					= 21;	//买保证金(spec_margin)
+  double 	s_margin	 				= 22;	//卖保证金
+  bytes 	strategy_code		 		= 23;	//组合策略代码  
+  bytes 	strategy_name				= 24;	//组合策略简称
+  bytes 	ca_contract					= 25;	//组合合约代码
+  bytes 	currency_code 				= 26;	//币种
+  bytes 	contract_short_name 		= 27;	//合约简称 
+  bytes 	trade_type					= 28;	//交易类型
+  double 	royalty 					= 29;	//权利金
+  double 	exch_margin	 				= 30;	//交易所保证金
+  uint32 	expire_days 				= 31;	//到期天数  
+  double 	today_degree				= 32;	//虚实程度
+  double 	opt_hold_profit				= 33;	//期权浮动盈亏
+  uint32 	frzn_qty	 				= 34;	//平仓冻结数量
+  uint32 	exer_frzn_qty 				= 35;	//行权冻结数量
+  bytes 	exec_date 					= 36;	//行权日
+  bytes 	cp_flag						= 37;	//合约类型
+  double 	hold_opt_cap 				= 38;	//持仓市值
+  double 	close_all_position			= 39;	//斩仓损益
+  bytes 	vari_name 					= 40;	//品种名称  
+  RspInfo   rspInfo						= 41;	//返回信息
+}
+
+//客户委托信息查询请求
+message QrySingleCustEntrustReq 
+{
+  bytes 	cust_no		 				= 1;	//客户号
+}
+
+//客户委托信息查询应答
+message QrySingleCustEntrustRsp 
+{
+  uint32	pack_flag          			= 1;    //首尾包标志
+  bytes 	cust_no		 				= 2;	//客户号
+  bytes 	cust_name 					= 3;	//客户简称 
+  bytes 	entrust_no 					= 4;	//委托号
+  bytes 	entrust_oper 				= 5;	//下单操作员    
+  bytes 	exch_code		 			= 6;	//交易所代码
+  bytes 	vari_code 					= 7;	//品种代码
+  bytes 	contract_code 				= 8;	//合约号(合约1-4，不为空则用&连接)
+  bytes 	deliv_date 					= 9;	//交割期  
+  bytes 	sh_flag		 				= 10;	//投保标记
+  bytes 	bs_flag 					= 11;	//买卖方向
+  bytes 	eo_flag 					= 12;	//开平方向
+  bytes 	entrust_status 				= 13;	//委托状态
+  uint32 	entrust_qty 				= 14;	//委托手数  
+  double 	entrust_price 				= 15;	//委托价格    
+  uint32 	remain_qty		 			= 16;	//剩余手数
+  double 	done_price 					= 17;	//成交价格
+  uint32 	done_qty 					= 18;	//成交手数  
+  bytes 	sys_no 						= 19;	//系统号(scust_auth2)
+  bytes 	entrust_time 				= 20;	//委托时间
+  bytes 	order_time					= 21;	//申报时间
+  bytes 	tx_no						= 22;	//交易编码
+  bytes 	entrust_way					= 23;	//委托方式
+  bytes 	cancel_oper					= 24;	//撤单操作员
+  bytes 	cancel_time					= 25;	//撤单时间
+  bytes 	entrust_type	 			= 26;	//委托类型
+  bytes 	tunnel_code		 			= 27;	//通道代码  
+  bytes 	remark						= 28;	//备注
+  uint32 	update_batch				= 29;	//修改批次
+  bytes 	currency_code 				= 30;	//币种
+  bytes 	force_offset 				= 31;	//强平标记 
+  uint32 	cmd_no						= 32;	//指令编号
+  bytes 	entrust_seat_no 			= 33;	//下单席位
+  bytes 	other_system	 			= 34;	//其他系统标志
+  bytes 	strategy_code 				= 35;	//组合策略代码  
+  bytes 	order_type					= 36;	//定单类型
+  bytes 	done_attribute				= 37;	//成交属性
+  double 	slp_price	 				= 38;	//止损（盈）价
+  bytes 	combination_type 			= 39;	//组合类型
+  bytes 	trigger_time 				= 40;	//触发时间
+  bytes 	en_oper_type				= 41;	//下单人类型
+  bytes 	private_info 				= 42;	//私有信息
+  bytes 	private_flag				= 43;	//私有标识
+  bytes 	private_serial_no 			= 44;	//私有流水号  
+  uint32 	session_id 					= 45;	//下单会话号  
+  uint32 	cancel_session_id 			= 46;	//撤单会话号  
+  double 	frzn_margin 				= 47;	//冻结保证金  
+  double 	frzn_commi 					= 48;	//冻结手续费  
+  uint32 	min_done_qty 				= 49;	//最小成交数量  
+  bytes 	trade_type 					= 50;	//交易类别  
+  bytes 	contract_short_name 		= 51;	//合约简称  
+  double 	frzn_royalty 				= 52;	//冻结权利金  
+  RspInfo   rspInfo						= 53;	//返回信息
+}
+
+//交易所对应品种查询请求
+message QryExchVariReq 
+{
+  bytes 	exch_code	 				= 1;	//交易所代码
+  bytes 	trade_type	 				= 2;	//交易类别  
+}
+
+//交易所对应品种查询应答
+message QryExchVariRsp
+ {
+  uint32	pack_flag          			= 1;    //首尾包标志
+  bytes 	exch_code		 			= 2;	//交易所代码 
+  bytes 	vari_code 					= 3;	//品种代码 
+  bytes 	vari_name	 				= 4;	//品种名称
+  bytes 	trade_type 					= 5;	//交易类别 
+  RspInfo   rspInfo						= 6;	//返回信息
+}
+
+//合约查询请求
+message QryContractReq 
+{
+  bytes 	exch_code	 				= 1;	//交易所代码
+  bytes 	trade_type	 				= 2;	//交易类别  
+  bytes 	contract_code	 			= 3;	//合约代码 
+  bytes 	vari_code	 				= 4;	//品种代码 
+}
+
+//合约查询应答
+message QryContractRsp 
+{
+  uint32	pack_flag          			= 1;    //首尾包标志
+  bytes 	exch_code		 			= 2;	//交易所代码 
+  bytes 	exch_name		 			= 3;	//交易所名称   
+  bytes 	vari_code 					= 4;	//品种代码 
+  bytes 	vari_name	 				= 5;	//品种名称
+  bytes 	deliv_date	 				= 6;	//交割期
+  bytes 	contract_code 				= 7;	//合约代码 
+  bytes 	trade_type 					= 8;	//交易类别 
+  uint32 	hands		 				= 9;	//每手数量 
+  bytes 	trade_rule		 			= 10;	//最后交易日规则   
+  uint32 	min_hand 					= 11;	//最小下单手数 
+  uint32 	max_hand	 				= 12;	//最大下单手数
+  uint32 	market_max_hand	 			= 13;	//市价最大手数
+  uint32 	max_hold 					= 14;	//最大持仓手数 
+  bytes 	currency_code 				= 15;	//币种   
+  double 	price_unit		 			= 16;	//最小变动价位 
+  bytes 	contract_status		 		= 17;	//合约状态   
+  bytes 	contract_short_name 		= 18;	//合约简称 
+  bytes 	fund_algorithm	 			= 19;	//资金算法
+  bytes 	if_margin_dis	 			= 20;	//优惠标识
+  double 	listing_price 				= 21;	//挂牌价 
+  double 	strike_price 				= 22;	//行权价   
+  bytes 	option_type		 			= 23;	//期权类型 
+  bytes 	cp_flag		 				= 24;	//涨跌标志 (smain_flag2)
+  bytes 	last_trade_date 			= 25;	//最后交易日 
+  bytes 	trade_code	 				= 26;	//个股合约标识码
+  bytes 	contract_type	 			= 27;	//期权认购认沽标志
+  double 	yes_close_price 			= 28;	//合约前收盘价 
+  double 	yes_settle_price 			= 29;	//合约前结算价  
+  uint32 	contract_unit		 		= 30;	//合约单位 
+  bytes 	vari_type		 			= 31;	//品种类型
+  bytes 	exec_date 					= 32;	//行权日 
+  bytes 	expire_date	 				= 33;	//到期日
+  uint32 	unover_pisition_num	 		= 34;	//当前合约未平仓数
+  double 	last_vari_price 			= 35;	//标的证券前收盘价 
+  double 	margin_unit 				= 36;	//单位保证金
+  uint32 	margin_ratio1		 		= 44;	//保证金计算比例参数1 
+  uint32 	margin_ratio2		 		= 45;	//保证金计算比例参数2
+  uint32 	market_min_hands 			= 46;	//单笔市价申报下限 
+  bytes 	listing_date	 			= 47;	//上市日期
+  uint32 	expire_days 				= 48;	//距离到期日天数 
+  double 	new_price 					= 49;	//合约实时价格
+  double 	today_settle_price 			= 50;	//合约今日结算价 
+  double 	last_price 					= 51;	//标的证券价格
+  double 	volatility_rate 			= 52;	//昨日波动率 
+  RspInfo   rspInfo						= 53;	//返回信息
+}
+
+//合约范围项
+message ContrRangeField
+{
+  bytes			name					= 1;	//name
+  bytes			type					= 2;    //类型 1合约号 2 品种 3交割期
+  bytes		    value					= 3;	//值 合约号 品种 交割期
+}
+
+//行情监控设置
+message QuoteMonitorSetting
+{
+  enum QuoteType
+  {	
+	RiskQuote				= 0;	//风险行情
+	MarginQuote				= 1;	//保证金行情
+  }
+  uint32							pack_flag          			= 1;    //首尾包标志
+  uint32							action_flag					= 2;	//操作标志 1增改 2删除
+  bytes								monitor_no					= 3;	//监控编号
+  bytes 							trade_type					= 4;	//交易类型
+  repeated  SettingValueField		filter_fields				= 5;    //过滤项
+  repeated  ContrRangeField       	range_fields			    = 6;    //范围项集合
+  QuoteType							quote_type					= 7;	//行情监控类别
+}
+
+//风险合约级别设置
+message RiskContrLevelSetting
+{
+  uint32			pack_flag          	= 1;    //首尾包标志
+  uint32			action_flag			= 2;	//操作标志 1增改 2删除
+  bytes				setting_no			= 3;	//配置编号
+  bytes 			smarket_code		= 4;	//市场代码 
+  bytes 			sec_code 			= 5;	//品种代码 
+  bytes 			trade_type			= 6;	//交易类型
+  repeated  double	level_values		= 7;	//风险级别1-N对应的距离涨跌停比例值
+}
+
+//合约组配置
+message ContrGroupSetting
+{
+  uint32						pack_flag          	= 1;    //首尾包标志
+  uint32						action_flag			= 2;	//操作标志 1增改 2删除
+  bytes							contr_group_no		= 3;	//合约组编号
+  bytes							contr_group_name	= 4;	//合约组名称
+  repeated  bytes				contrs				= 5;	//合约号s
+}
+
+//商品组监控设置
+message ProductGroupMonitorSetting
+{
+  uint32							pack_flag          			= 1;    //首尾包标志
+  uint32							action_flag					= 2;	//操作标志 1增改 2删除
+  bytes								monitor_no					= 3;	//监控编号
+  repeated	bytes					contr_group_nos				= 4;	//合约组编号
+  repeated  SettingValueField		filter_fields				= 5;    //过滤项
+}
+
+//客户风险监控设置
+message CustRiskMonitorSetting
+{
+  uint32							pack_flag          					= 1;    //首尾包标志
+  uint32							action_flag							= 2;	//操作标志 1增改 2删除
+  bytes								monitor_no							= 3;	//监控编号
+  repeated  	bytes				custs								= 5;	//客户集
+  repeated  	SettingValueField	filter_fields						= 4;    //过滤项
+}
+
+//客户组设置
+message CustGroupSetting
+{
+  uint32			pack_flag          					= 1;    //首尾包标志
+  uint32			action_flag							= 2;	//操作标志 1增改 2删除
+  bytes				cust_group_no						= 3;	//客户组编号
+  bytes  			cust_group_name						= 4;    //客户组名称
+  repeated  bytes	custs								= 5;	//客户s	  
+}
+
+//公司持仓监控设置
+message CorpHoldMonitorSetting
+{
+  uint32							pack_flag          			= 1;    //首尾包标志
+  uint32							action_flag					= 2;	//操作标志 1增改 2删除
+  bytes								monitor_no					= 3;	//监控编号
+  repeated	bytes					contrs						= 4;	//合约集编号
+  repeated  SettingValueField		filter_fields				= 5;    //过滤项
+}
+
+//强平客户信息查询请求
+message QryForceCustInfoReq
+{
+  bytes 	cust_no		 				= 1;	//客户号
+  bytes 	currency_code	 			= 2;	//币种
+}
+
+//强平客户信息应答
+message ForceCustInfoRsp
+{
+  uint32	pack_flag          			= 1;    //首尾包标志
+  bytes 	cust_no		 				= 2;	//客户号
+  bytes 	cust_name 					= 3;	//客户简称  
+  bytes 	cust_class 					= 4;	//客户类
+  bytes 	phone		 				= 5;	//电话
+  bytes 	mobile		 				= 6;	//手机号码
+  bytes 	broker_list		 			= 7;	//经纪人 
+  double 	dyn_right 					= 8;	//动态权益
+  double 	margin		 				= 9;	//持仓保证金   
+  double 	add_margin					= 10;	//追加保证金
+  double 	last_add_margin				= 11;	//昨日追加保证金
+  double 	today_inout	 				= 12;	//今日出入金
+  bytes 	cmd_assign 					= 13;	//指令下达人
+  double 	exch_margin 				= 14;	//交易所保证金 
+  double 	exch_add_margin 			= 15;	//交易所追加保证金
+  bytes 	credit_level 				= 16;	//资信等级
+  bytes 	risk_level 					= 17;	//风险级别
+  bytes 	risk_type 					= 18;	//风险类型
+  bytes 	batch_force_offset 			= 19;	//参与批量强平  
+  bytes 	fund_allot1					= 20;	//资金调拨人1
+  bytes 	fund_allot_tel1				= 21;	//资金调拨人电话
+  bytes 	cmd_assign1_tell			= 22;	//指令下达人电话
+  double 	last_avail_fund 			= 23;	//昨日可用资金 
+  double 	last_rights 				= 24;	//昨日权益
+  double 	risk_degree1				= 25;	//风险度1
+  bytes 	notify_status				= 26;	//通知状态
+  bytes 	top_notify_level			= 27;	//最高通知类型  
+  double 	risk_degree2				= 28;	//风险度2
+  bytes 	notify_info 				= 29;	//通知内容  
+  bytes 	currency_code 				= 30;	//币种 
+  double 	royalty_inout 				= 31;	//权利金收支
+  double 	option_cap 					= 32;	//期权市值
+  double 	dync_cap_right 				= 33;	//动态市值权益
+  double 	option_dyn_margin 			= 34;	//浮动保证金  
+  double 	exch_option_dyn_margin		= 35;	//交易所浮动保证金  
+  double 	frzn_margin 				= 36;	//冻结保证金  
+  double 	exch_frzn_margin			= 37;	//交易所冻结保证金   
+  double 	frzn_strike_margin			= 38;	//执行冻结  
+  double 	frzn_royalty				= 39;	//冻结权利金  
+  uint32	trade_level          		= 40;   //上海交易等级
+  uint32	trade_level_szse          	= 41;   //深圳交易等级
+  bytes 	clientmode 					= 42;	//客户模式
+  double 	avail_fund 					= 43;	//可用资金 
+  RspInfo   rspInfo						= 44;	//返回信息
+}
+
+message CustHoldMonitorSetting
+{
+  uint32							pack_flag          			= 1;    //首尾包标志
+  uint32							action_flag					= 2;	//操作标志 1增改 2删除
+  bytes								monitor_no					= 3;	//监控编号
+  repeated	bytes					custs						= 4;	//客户号集
+  repeated  SettingValueField		filter_fields				= 5;    //过滤项
+}
+
+message CustGroupHoldMonitorSetting
+{
+  uint32							pack_flag          			= 1;    //首尾包标志
+  uint32							action_flag					= 2;	//操作标志 1增改 2删除
+  bytes								monitor_no					= 3;	//监控编号
+  repeated	bytes					cust_group_nos				= 4;	//客户组编号
+  repeated  SettingValueField		filter_fields				= 5;    //过滤项
+}
+
+message NearDediveHoldMonitorSetting
+{
+  uint32							pack_flag          			= 1;    //首尾包标志
+  uint32							action_flag					= 2;	//操作标志 1增改 2删除
+  bytes								monitor_no					= 3;	//监控编号
+  repeated	bytes					custs						= 4;	//客户号集
+  repeated  SettingValueField		filter_fields				= 5;    //过滤项
+}
+
+message HoldMaxLimit
+{
+	enum HoldLimitConditionType
+	{
+		SINGLE_SIDE_HOLD_LIMIT				= 0;	//单边持仓量
+		BOTH_SIDE_HOLD_LIMIT				= 1;	//双边持仓量
+		NO_HOLD_LIMIT						= 2;	//无持仓量
+	}
+	enum QtyLimitType
+	{
+		RATIO_LIMIT				= 0;	//持仓比例限制参数
+		AMOUNT_LIMIT			= 1;	//持仓数量限制参数
+		NO_LIMIT				= 2;	//  无持仓限制参数
+	}
+	enum CompareFlag
+	{
+		Greater					= 0;	//大于
+		GreaterAndEqual			= 1;	//大于等于
+		Lesser					= 2;	//小于
+		LesserAndEqual			= 3;	//小于等于
+	}
+	HoldLimitConditionType		condition_type			= 1;	//持仓限制判定条件类型
+	double						condition_value			= 2;	//持仓限制判定条件的值
+	CompareFlag					conditioncompareflag	= 3;	//持仓前置条件比较方式
+	QtyLimitType				hold_value_limit_type	= 4;	//限制类型的数值类型
+	double						hold_value				= 5;	//持仓限制的数量或者比例
+}
+
+message HoldLimitDateNode
+{
+	bytes					date					= 1;	//日期节点
+	repeated HoldMaxLimit 	hold_max_limits			= 2;	//限仓规则
+}
+
+message HoldLimitTimeLine
+{
+	bytes 						contract_code	 			= 1;	//合约代码 
+	repeated HoldLimitDateNode 	date_nodes					= 2;	//日期节点的集合
+}
+
+message MarginLimitDateNode
+{
+	bytes					date					= 1;	//日期节点
+	double					min_margin_ratio		= 2;	//最小保证金比例
+}
+
+message MarginLimitHoldNode
+{
+	uint32					lower_limit_qty			= 1;	//持仓数量下限
+	uint32					upper_limit_qty			= 2;	//最大数量上限
+	double					min_margin_ratio		= 3;	//最小保证金比例
+}
+
+message MarginLimitTimeLine
+{
+	bytes 								contract_code	 	= 1;	//合约代码 
+	repeated MarginLimitDateNode	 	date_nodes			= 2;	//日期节点的集合
+	repeated MarginLimitHoldNode		hold_nodes			= 3;	//持仓节点的集合
+}
+
+message HoldLimitSetting
+{
+  uint32							pack_flag          			= 1;    //首尾包标志
+  uint32							action_flag					= 2;	//操作标志 1增改 2删除
+  bytes 							exch_code	 				= 3;	//交易所代码
+  bytes 							vari_code					= 4;	//品种代码
+  repeated HoldLimitTimeLine		settings					= 5;	//配置项
+}
+
+message MarginLimitSetting
+{
+  uint32							pack_flag          			= 1;    //首尾包标志
+  uint32							action_flag					= 2;	//操作标志 1增改 2删除
+  bytes 							exch_code	 				= 3;	//交易所代码
+  bytes 							vari_code					= 4;	//品种代码
+  repeated MarginLimitTimeLine		settings					= 5;	//配置项
+}
+
+message ArbitrageLimitDateNode
+{
+	enum LimitType
+	{	
+		CzceDelive					= 0;	//投机&套利持仓之和不超过1倍限仓标准
+		CzceNormal					= 1;	//投机&套利持仓之和不超过2倍限仓标准，且投机不超过1倍限仓标准
+	}
+	bytes					date					= 1;	//日期节点
+	LimitType				type					= 2;	//限仓算法类型
+}
+
+message ArbitrageLimitTimeLine
+{
+	bytes 								contract_code	 	= 1;	//合约代码 
+	repeated ArbitrageLimitDateNode	 	date_nodes			= 2;	//日期节点的集合
+}
+
+message ArbitrageLimitSetting
+{
+  uint32							pack_flag          			= 1;    //首尾包标志
+  uint32							action_flag					= 2;	//操作标志 1增改 2删除
+  bytes 							exch_code	 				= 3;	//交易所代码
+  bytes 							vari_code					= 4;	//品种代码
+  repeated ArbitrageLimitTimeLine	settings					= 5;	//配置项
+}
+
+
+message EarlyWrningTimeSetting
+{
+	uint32			pack_flag          			= 1;    //首尾包标志
+	uint32			action_flag					= 2;	//操作标志 1增改 2删除
+	int32			early_tradedays				= 3;	//提前交易日
+}
+
+message EarlyWrningValueSetting
+{
+	uint32			pack_flag          			= 1;    //首尾包标志
+	uint32			action_flag					= 2;	//操作标志 1增改 2删除
+	bytes 			exch_code	 				= 3;	//交易所代码
+	bytes 			vari_code					= 4;	//品种代码
+	int32			early_value					= 5;	//提前值
+	int32			early_radio					= 6;	//提比例n%
+	bytes 			trade_type					= 7;	//交易类型
+}
+
+message NearDediveSetting
+{
+	enum CloseDateType
+	{	
+		LastTradeDateDelive1				= 0;	//交割月前一个月最后交易日
+		LastTradeDate3						= 1;	//最后交易日前第3个交易日
+		LastTradeDate8						= 2;	//最后交易日前第8个交易日
+	}
+	enum ClientType
+	{	
+		LagelPerson								= 0;	//法人
+		NaturalAndLagelPerson					= 1;	//自然人&法人
+	}
+	uint32			pack_flag          			= 1;    //首尾包标志
+	uint32			action_flag					= 2;	//操作标志 1增改 2删除
+	bytes 			exch_code	 				= 3;	//交易所代码
+	bytes 			vari_code					= 4;	//品种代码
+	CloseDateType	close_date					= 5;	//自然人最后平仓日
+	ClientType		client_type					= 6;	//实用客户
+	int32			base_hold					= 7;	//持仓基数	
+	bytes 			trade_type					= 8;	//交易类型
+}
+
+// 随合约持仓量变化调整
+message VariationObject
+{
+  uint32							Start          			= 1;    //开始值
+  uint32							End						= 2;	//结束值
+  double 							Margin	 				= 3;	//保证金（%）
+}
+
+// 区间配置项
+message VariMarginLimitTimeLineNode
+{
+  enum TimeLineNodeTypeEnum
+  {
+      Delivery_Month			= 0; //交割月
+      Delivery_Month_One		= 1; //交割月前第一个月
+      Delivery_Month_Second		= 2; //交割月前第二个月
+      Delivery_Month_Third		= 3; //交割月前第三个月
+      Listing_Date				= 4; //挂牌日
+      Last_Trade_Date			= 5; //最后交易日
+  }
+  TimeLineNodeTypeEnum				TiemLineNodeType        = 1;    //时间轴节点类型
+  uint32							Day						= 2;	//天
+  double 							MinMargin	 			= 3;	//最低保证金（%）
+}
+
+message VariMarginLimitSetting
+{
+  enum	StatisticsDateTypeEnum
+  {
+		Trade				= 0; //交易日
+        Calendar			= 1; //日历日
+  }
+  enum PositionVariationMarginTypeEnum
+  {
+        Fixed				= 0; //固定保证金率
+        Variation			= 1; //随合约持仓量变化调整
+  }
+  uint32								pack_flag          			= 1;    //首尾包标志
+  uint32								action_flag					= 2;	//操作标志 1增改 2删除
+  bytes 								exch_code	 				= 3;	//交易所代码
+  bytes 								vari_code					= 4;	//品种代码
+  StatisticsDateTypeEnum				statisticsDateType			= 5;    //统计日期类型
+  PositionVariationMarginTypeEnum		positionVariationMarginType = 6;    //持仓变动保证金类型
+  repeated VariationObject				VariationObjects 			= 7;	//随合约持仓量变化调整项
+  repeated VariMarginLimitTimeLineNode  MarginLimitTimeLineNodes	= 8;	//区间配置项
+  bytes 								trade_type					= 9;	//交易类型
+}
+
+message ConditionHoldLimitObject
+{
+    enum CompareFlagEnum
+	{
+		Greater					= 0;	//大于
+		GreaterAndEqual			= 1;	//大于等于
+		Lesser					= 2;	//小于
+		LesserAndEqual			= 3;	//小于等于
+	}
+	enum QtyLimitTypeEnum
+	{
+		RATIO_LIMIT				= 0;	//持仓比例限制参数
+		AMOUNT_LIMIT			= 1;	//持仓数量限制参数
+		NO_LIMIT				= 2;	//  无持仓限制参数
+	}
+	CompareFlagEnum			compare_flag			= 1;	//比较符
+	uint32					hands					= 2;	//手数
+	QtyLimitTypeEnum		limit_type				= 3;	//限制类型的数值类型
+	double 					hold_value				= 4;	//持仓限制的数量或者比例
+}
+
+message VariHoldLimitTimeLineNode
+{
+    enum TimeLineNodeTypeEnum
+    {
+      Delivery_Month			= 0; //交割月
+      Delivery_Month_One		= 1; //交割月前第一个月
+      Delivery_Month_Second		= 2; //交割月前第二个月
+      Delivery_Month_Third		= 3; //交割月前第三个月
+      Listing_Date				= 4; //挂牌日
+      Last_Trade_Date			= 5; //最后交易日
+    }
+	enum HoldLimitConditionTypeEnum
+	{
+		SINGLE_SIDE_HOLD_LIMIT				= 0;	//单边持仓量
+		BOTH_SIDE_HOLD_LIMIT				= 1;	//双边持仓量
+		NO_HOLD_LIMIT						= 2;	//无持仓量
+	}
+	TimeLineNodeTypeEnum 					TiemLineNodeType	 			= 1;	//时间轴节点类型 
+	uint32									Day								= 2;	//天
+	HoldLimitConditionTypeEnum 				conditionType	 				= 3;	//限仓方式
+	repeated ConditionHoldLimitObject 		ConditionHoldLimitObjects	    = 4;	//限仓量
+}
+
+message VariHoldLimitSetting
+{
+  enum	StatisticsDateTypeEnum
+  {
+		Trade				= 0; //交易日
+        Calendar			= 1; //日历日
+  }
+  uint32								pack_flag          			= 1;    //首尾包标志
+  uint32								action_flag					= 2;	//操作标志 1增改 2删除
+  bytes 								exch_code	 				= 3;	//交易所代码
+  bytes 								vari_code					= 4;	//品种代码
+  StatisticsDateTypeEnum				statisticsDateType			= 5;    //统计日期类型
+  repeated VariHoldLimitTimeLineNode	VariHoldLimitTimeLineNodes  = 6;	//区间配置项
+  bytes 								trade_type					= 7;	//交易类型
+}
+
+message VariArbitrageLimitTimeLineNode
+{
+    enum TimeLineNodeTypeEnum
+    {
+      Delivery_Month			= 0; //交割月
+      Delivery_Month_One		= 1; //交割月前第一个月
+      Delivery_Month_Second		= 2; //交割月前第二个月
+      Delivery_Month_Third		= 3; //交割月前第三个月
+      Listing_Date				= 4; //挂牌日
+      Last_Trade_Date			= 5; //最后交易日
+    }
+	enum LimitTypeEnum
+	{	
+		CzceDelive					= 0;	//投机&套利持仓之和不超过1倍限仓标准
+		CzceNormal					= 1;	//投机&套利持仓之和不超过2倍限仓标准，且投机不超过1倍限仓标准
+	}
+	TimeLineNodeTypeEnum 					TiemLineNodeType	 			= 1;	//时间轴节点类型  
+	uint32									Day								= 2;	//天
+	LimitTypeEnum							type							= 3;	//限仓算法类型
+}
+
+message VariArbitrageLimitSetting
+{
+  enum	StatisticsDateTypeEnum
+  {
+		Trade				= 0; //交易日
+        Calendar			= 1; //日历日
+  }
+  uint32									pack_flag          				= 1;    //首尾包标志
+  uint32									action_flag						= 2;	//操作标志 1增改 2删除
+  bytes 									exch_code	 					= 3;	//交易所代码
+  bytes 									vari_code						= 4;	//品种代码
+  StatisticsDateTypeEnum					statisticsDateType				= 5;    //统计日期类型
+  repeated VariArbitrageLimitTimeLineNode	VariArbitrageLimitTimeLineNodes = 6;	//配置项
+  bytes 									trade_type						= 7;	//交易类型
+}

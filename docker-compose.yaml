@@ -1,0 +1,13 @@
+master:
+  image: rethinkdb:2.3.6
+  ports:
+    - 28015:28015
+    - 29015:29015
+    - 8080:8080
+  command: rethinkdb --bind all
+
+slave:
+  image: rethinkdb:2.3.6
+  links:
+    - master
+  command: rethinkdb --bind all --join master
