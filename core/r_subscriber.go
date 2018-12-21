@@ -15,7 +15,7 @@ type Subscriber interface {
 type Pipeline interface {
 	BufferTime(in <-chan interface{}) <-chan []interface{}
 	BufferCount(in <-chan interface{}) <-chan []interface{}
-	Write(in <-chan []interface{})
+	Write(in <-chan []interface{}) error
 }
 
 type pipeline struct {
@@ -109,13 +109,16 @@ func (s *pipeline) BufferCount(in <-chan interface{}) <-chan []interface{} {
 	return out
 }
 
-func (s *pipeline) Write(in <-chan []interface{}) {
+func (s *pipeline) Write(in <-chan []interface{}) error {
 	for messages := range in {
 		// log.Infof("Write : %v", len(messages))
 		res, err := r.Table(s.table).Insert(messages, r.InsertOpts{Durability: "hard", Conflict: "update", ReturnChanges: false}).Run(s.session)
 		if err != nil {
 			log.Error(err)
+			return err
 		}
 		res.Close()
 	}
+
+	return nil
 }

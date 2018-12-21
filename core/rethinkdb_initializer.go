@@ -17,7 +17,7 @@ var (
 	TableName_SubscribeNearDediveHold  = "SubscribeNearDediveHold"
 )
 
-func CreateDBAndTableAfterDrop(session *r.Session) error {
+func CreateDBAndTableAfterDrop(session *r.Session, shardsAndReplicas int) error {
 	res, err := r.DBList().Run(session)
 	if err != nil {
 		return err
@@ -53,35 +53,35 @@ func CreateDBAndTableAfterDrop(session *r.Session) error {
 	session.Use(DbName)
 
 	primaryKey := "ActionKey"
-	err = createTable(session, TableName_SubscribeTunnelRealFund, primaryKey)
+	err = createTable(session, TableName_SubscribeTunnelRealFund, primaryKey, shardsAndReplicas)
 	if err != nil {
 		return err
 	}
-	err = createTable(session, TableName_SubscribeCorpHoldMon, primaryKey)
+	err = createTable(session, TableName_SubscribeCorpHoldMon, primaryKey, shardsAndReplicas)
 	if err != nil {
 		return err
 	}
-	err = createTable(session, TableName_SubscribeQuoteMon, primaryKey)
+	err = createTable(session, TableName_SubscribeQuoteMon, primaryKey, shardsAndReplicas)
 	if err != nil {
 		return err
 	}
-	err = createTable(session, TableName_SubscribeCustRisk, primaryKey)
+	err = createTable(session, TableName_SubscribeCustRisk, primaryKey, shardsAndReplicas)
 	if err != nil {
 		return err
 	}
-	err = createTable(session, TableName_SubscribeCustHold, primaryKey)
+	err = createTable(session, TableName_SubscribeCustHold, primaryKey, shardsAndReplicas)
 	if err != nil {
 		return err
 	}
-	err = createTable(session, TableName_SubscribeCustGroupHold, primaryKey)
+	err = createTable(session, TableName_SubscribeCustGroupHold, primaryKey, shardsAndReplicas)
 	if err != nil {
 		return err
 	}
-	err = createTable(session, TableName_SubscribeProuctGroupRisk, primaryKey)
+	err = createTable(session, TableName_SubscribeProuctGroupRisk, primaryKey, shardsAndReplicas)
 	if err != nil {
 		return err
 	}
-	err = createTable(session, TableName_SubscribeNearDediveHold, primaryKey)
+	err = createTable(session, TableName_SubscribeNearDediveHold, primaryKey, shardsAndReplicas)
 	if err != nil {
 		return err
 	}
@@ -89,7 +89,7 @@ func CreateDBAndTableAfterDrop(session *r.Session) error {
 	return nil
 }
 
-func CreateDBAndTableIfNotExisted(session *r.Session) error {
+func CreateDBAndTableIfNotExisted(session *r.Session, shardsAndReplicas int) error {
 	err := createDbIfNotExisted(session, DbName)
 	if err != nil {
 		log.Error(err)
@@ -98,42 +98,42 @@ func CreateDBAndTableIfNotExisted(session *r.Session) error {
 	session.Use(DbName)
 
 	primaryKey := "ActionKey"
-	err = createTableIfNotExisted(session, TableName_SubscribeTunnelRealFund, primaryKey)
+	err = createTableIfNotExisted(session, TableName_SubscribeTunnelRealFund, primaryKey, shardsAndReplicas)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
-	err = createTableIfNotExisted(session, TableName_SubscribeCorpHoldMon, primaryKey)
+	err = createTableIfNotExisted(session, TableName_SubscribeCorpHoldMon, primaryKey, shardsAndReplicas)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
-	err = createTableIfNotExisted(session, TableName_SubscribeQuoteMon, primaryKey)
+	err = createTableIfNotExisted(session, TableName_SubscribeQuoteMon, primaryKey, shardsAndReplicas)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
-	err = createTableIfNotExisted(session, TableName_SubscribeCustRisk, primaryKey)
+	err = createTableIfNotExisted(session, TableName_SubscribeCustRisk, primaryKey, shardsAndReplicas)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
-	err = createTableIfNotExisted(session, TableName_SubscribeCustHold, primaryKey)
+	err = createTableIfNotExisted(session, TableName_SubscribeCustHold, primaryKey, shardsAndReplicas)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
-	err = createTableIfNotExisted(session, TableName_SubscribeCustGroupHold, primaryKey)
+	err = createTableIfNotExisted(session, TableName_SubscribeCustGroupHold, primaryKey, shardsAndReplicas)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
-	err = createTableIfNotExisted(session, TableName_SubscribeProuctGroupRisk, primaryKey)
+	err = createTableIfNotExisted(session, TableName_SubscribeProuctGroupRisk, primaryKey, shardsAndReplicas)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
-	err = createTableIfNotExisted(session, TableName_SubscribeNearDediveHold, primaryKey)
+	err = createTableIfNotExisted(session, TableName_SubscribeNearDediveHold, primaryKey, shardsAndReplicas)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -176,7 +176,7 @@ func createDbIfNotExisted(session *r.Session, dbName string) error {
 	return nil
 }
 
-func createTableIfNotExisted(session *r.Session, tableName string, primaryKey string) error {
+func createTableIfNotExisted(session *r.Session, tableName string, primaryKey string, shardsAndReplicas int) error {
 	res, err := r.TableList().Run(session)
 	if err != nil {
 		return err
@@ -197,7 +197,7 @@ func createTableIfNotExisted(session *r.Session, tableName string, primaryKey st
 		}
 	}
 	if !existed {
-		_, err = r.TableCreate(tableName, r.TableCreateOpts{PrimaryKey: primaryKey, Shards: 4, Replicas: 4}).Run(session)
+		_, err = r.TableCreate(tableName, r.TableCreateOpts{PrimaryKey: primaryKey, Shards: shardsAndReplicas, Replicas: shardsAndReplicas}).Run(session)
 		if err != nil {
 			return err
 		}
@@ -221,8 +221,8 @@ func createDb(session *r.Session, dbName string) error {
 	return nil
 }
 
-func createTable(session *r.Session, tableName string, primaryKey string) error {
-	_, err := r.TableCreate(tableName, r.TableCreateOpts{PrimaryKey: primaryKey, Shards: 4, Replicas: 4}).Run(session)
+func createTable(session *r.Session, tableName string, primaryKey string, shardsAndReplicas int) error {
+	_, err := r.TableCreate(tableName, r.TableCreateOpts{PrimaryKey: primaryKey, Shards: shardsAndReplicas, Replicas: shardsAndReplicas}).Run(session)
 	if err != nil {
 		log.Errorf("Table %s created failed : %v", tableName, err)
 		return err

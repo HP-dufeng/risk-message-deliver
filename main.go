@@ -17,9 +17,10 @@ import (
 )
 
 var (
-	rethinkAddr = flag.String("RethinkDB__Url", "websocket-rethinkdb:28015", "The rethinkdb server address in the format of host:port")
-	serverAddr  = flag.String("RiskMonitorServer__Url", "riskmonitorserver:31002", "The server address in the format of host:port")
-	buffer      = flag.Int("Buffer", 1000, "Buffer size for subscription operations")
+	rethinkAddr       = flag.String("RethinkDB__Url", "websocket-rethinkdb:28015", "The rethinkdb server address in the format of host:port")
+	shardsAndReplicas = flag.Int("ShardsAndReplicas", 1, "shards and replicas for the rethinkdb tables")
+	serverAddr        = flag.String("RiskMonitorServer__Url", "riskmonitorserver:31002", "The server address in the format of host:port")
+	buffer            = flag.Int("Buffer", 1000, "Buffer size for subscription operations")
 )
 
 func main() {
@@ -69,9 +70,17 @@ func parseEnv() {
 		}
 	}
 
+	shardsAndReplicasEnv := os.Getenv("ShardsAndReplicas")
+	if shardsAndReplicasEnv != "" {
+		if i, err := strconv.Atoi(shardsAndReplicasEnv); err != nil {
+			shardsAndReplicas = &i
+		}
+	}
+
 	log.Println("RethinkDB__Url: ", *rethinkAddr)
 	log.Println("RiskMonitorServer__Url: ", *serverAddr)
 	log.Println("Buffer: ", *buffer)
+	log.Println("ShardsAndReplicas: ", *shardsAndReplicas)
 }
 
 func checkIfRethinkDBReady(rethinkAddr string) *r.Session {
@@ -96,7 +105,7 @@ func checkIfRethinkDBReady(rethinkAddr string) *r.Session {
 			}
 			log.Infof("RethinkDB connected successed : %v")
 
-			err = core.CreateDBAndTableAfterDrop(session)
+			err = core.CreateDBAndTableAfterDrop(session, *shardsAndReplicas)
 			if err != nil {
 				log.Errorln(err)
 				session.Close()
