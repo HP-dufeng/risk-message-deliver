@@ -7,24 +7,21 @@ import (
 	pb "github.com/fengdu/risk-monitor-server/pb"
 
 	log "github.com/sirupsen/logrus"
-	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
 )
 
 type tunnelRealFundSubscriber struct {
-	ctx     context.Context
-	client  pb.RiskMonitorServerClient
-	session *r.Session
+	ctx    context.Context
+	client pb.RiskMonitorServerClient
 }
 
-func NewTunnelRealFundSubscriber(ctx context.Context, client pb.RiskMonitorServerClient, session *r.Session) Subscriber {
+func NewTunnelRealFundSubscriber(ctx context.Context, client pb.RiskMonitorServerClient) Subscriber {
 	return &tunnelRealFundSubscriber{
-		ctx:     ctx,
-		client:  client,
-		session: session,
+		ctx:    ctx,
+		client: client,
 	}
 }
 
-func (c *tunnelRealFundSubscriber) Read(buffer int) <-chan interface{} {
+func (c *tunnelRealFundSubscriber) Subscribe(buffer int) <-chan interface{} {
 	log.Infoln("SubscribeTunnelRealFund started...")
 
 	out := make(chan interface{}, buffer)
@@ -50,7 +47,9 @@ func (c *tunnelRealFundSubscriber) Read(buffer int) <-chan interface{} {
 					return
 				}
 
-				out <- item
+				msg := struct2Map(*item)
+				msg["ActionKey"] = string(item.MonitorNo) + "#" + string(item.TunnelCode) + "#" + string(item.CurrencyCode)
+				out <- msg
 			case <-c.ctx.Done():
 				return
 			}
@@ -59,36 +58,4 @@ func (c *tunnelRealFundSubscriber) Read(buffer int) <-chan interface{} {
 	}()
 
 	return out
-}
-
-func (c *tunnelRealFundSubscriber) Convert(in <-chan interface{}) <-chan *Message {
-	out := make(chan *Message)
-	go func() {
-		defer close(out)
-		for n := range in {
-			item := n.(*pb.TunnelRealFundRtn)
-
-			msg := &Message{
-				TableName:  TableName_SubscribeTunnelRealFund,
-				ActionFlag: item.ActionFlag,
-				ActionKey:  string(item.MonitorNo) + "#" + string(item.TunnelCode) + "#" + string(item.CurrencyCode),
-				Msg:        *item,
-			}
-
-			out <- msg
-		}
-
-	}()
-	return out
-}
-
-func (c *tunnelRealFundSubscriber) Write(in <-chan *Message) {
-	for msg := range in {
-
-		err := msg.Replace(c.session)
-		if err != nil {
-			log.Errorf("Write TunnelRealFundRtn message failed : err: %v, message: %+v", err, *msg)
-			return
-		}
-	}
 }

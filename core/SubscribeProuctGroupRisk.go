@@ -7,24 +7,21 @@ import (
 	pb "github.com/fengdu/risk-monitor-server/pb"
 
 	log "github.com/sirupsen/logrus"
-	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
 )
 
 type prouctGroupRiskSubscriber struct {
-	ctx     context.Context
-	client  pb.RiskMonitorServerClient
-	session *r.Session
+	ctx    context.Context
+	client pb.RiskMonitorServerClient
 }
 
-func NewprouctGroupRiskSubscriber(ctx context.Context, client pb.RiskMonitorServerClient, session *r.Session) Subscriber {
+func NewProuctGroupRiskSubscriber(ctx context.Context, client pb.RiskMonitorServerClient) Subscriber {
 	return &prouctGroupRiskSubscriber{
-		ctx:     ctx,
-		client:  client,
-		session: session,
+		ctx:    ctx,
+		client: client,
 	}
 }
 
-func (c *prouctGroupRiskSubscriber) Read(buffer int) <-chan interface{} {
+func (c *prouctGroupRiskSubscriber) Subscribe(buffer int) <-chan interface{} {
 	log.Infoln("SubscribeProuctGroupRisk started...")
 
 	out := make(chan interface{}, buffer)
@@ -50,7 +47,9 @@ func (c *prouctGroupRiskSubscriber) Read(buffer int) <-chan interface{} {
 					return
 				}
 
-				out <- item
+				msg := struct2Map(*item)
+				msg["ActionKey"] = string(item.MonitorNo) + "#" + string(item.ProductGroupNo) + "#" + string(item.ContractCode)
+				out <- msg
 			case <-c.ctx.Done():
 				return
 			}
@@ -59,36 +58,4 @@ func (c *prouctGroupRiskSubscriber) Read(buffer int) <-chan interface{} {
 	}()
 
 	return out
-}
-
-func (c *prouctGroupRiskSubscriber) Convert(in <-chan interface{}) <-chan *Message {
-	out := make(chan *Message)
-	go func() {
-		defer close(out)
-		for n := range in {
-			item := n.(*pb.ProuctGroupRiskRtn)
-
-			msg := &Message{
-				TableName:  TableName_SubscribeProuctGroupRisk,
-				ActionFlag: item.ActionFlag,
-				ActionKey:  string(item.MonitorNo) + "#" + string(item.ProductGroupNo) + "#" + string(item.ContractCode),
-				Msg:        *item,
-			}
-
-			out <- msg
-		}
-
-	}()
-	return out
-}
-
-func (c *prouctGroupRiskSubscriber) Write(in <-chan *Message) {
-	for msg := range in {
-
-		err := msg.Replace(c.session)
-		if err != nil {
-			log.Errorf("Write ProuctGroupRiskRtn message failed : err: %v, message: %+v", err, *msg)
-			return
-		}
-	}
 }

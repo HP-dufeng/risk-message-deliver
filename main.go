@@ -94,9 +94,9 @@ func checkIfRethinkDBReady(rethinkAddr string) *r.Session {
 				time.Sleep(5 * time.Second)
 				continue
 			}
-			log.Infof("RethinkDB connected successed : %v", session)
+			log.Infof("RethinkDB connected successed : %v")
 
-			err = core.CreateDBAndTableIfNotExisted(session)
+			err = core.CreateDBAndTableAfterDrop(session)
 			if err != nil {
 				log.Errorln(err)
 				session.Close()
@@ -174,42 +174,27 @@ func subscribes(serverAddr string, session *r.Session, buffer int) {
 
 	done := make(chan struct{})
 
-	// do := func(subscriber core.Subscriber) {
-	// 	defer log.Warnf("%T defered", subscriber)
-	// 	c := subscriber.Read(buffer)
-	// 	msg := subscriber.Convert(c)
-	// 	subscriber.Write(msg)
-	// 	select {
-	// 	case done <- struct{}{}:
-	// 		return
-	// 	default:
-	// 		return
-	// 	}
-	// }
-
-	// go do(core.NewCustRiskSubscriber(ctx, client, session))
-	// go do(core.NewQuoteMonSubscriber(ctx, client, session))
-	// go do(core.NewTunnelRealFundSubscriber(ctx, client, session))
-	// go do(core.NewCorpHoldMonSubscriber(ctx, client, session))
-	// go do(core.NewCustHoldSubscriber(ctx, client, session))
-	// go do(core.NewsustGroupHoldSubscriber(ctx, client, session))
-	// go do(core.NewnearDediveHoldSubscriber(ctx, client, session))
-	// go do(core.NewprouctGroupRiskSubscriber(ctx, client, session))
-
-	go func() {
-		subscriber := core.NewSubscriber(ctx, core.TableName_SubscribeCustRisk, client, session)
+	do := func(subscriber core.Subscriber, pipeline core.Pipeline) {
 		defer log.Warnf("%T defered", subscriber)
-		c := subscriber.Read(buffer)
-		msgChan := subscriber.Convert(c)
-		messages := subscriber.BufferCount(msgChan)
-		subscriber.Write(messages)
+		c := subscriber.Subscribe(buffer)
+		msg := pipeline.BufferCount(c)
+		pipeline.Write(msg)
 		select {
 		case done <- struct{}{}:
 			return
 		default:
 			return
 		}
-	}()
+	}
+
+	go do(core.NewCustRiskSubscriber(ctx, client), core.NewPipeline(ctx, session, core.TableName_SubscribeCustRisk))
+	go do(core.NewQuoteMonSubscriber(ctx, client), core.NewPipeline(ctx, session, core.TableName_SubscribeQuoteMon))
+	go do(core.NewTunnelRealFundSubscriber(ctx, client), core.NewPipeline(ctx, session, core.TableName_SubscribeTunnelRealFund))
+	go do(core.NewCorpHoldMonSubscriber(ctx, client), core.NewPipeline(ctx, session, core.TableName_SubscribeCorpHoldMon))
+	go do(core.NewCustHoldSubscriber(ctx, client), core.NewPipeline(ctx, session, core.TableName_SubscribeCustHold))
+	go do(core.NewCsustGroupHoldSubscriber(ctx, client), core.NewPipeline(ctx, session, core.TableName_SubscribeCustGroupHold))
+	go do(core.NewNearDediveHoldSubscriber(ctx, client), core.NewPipeline(ctx, session, core.TableName_SubscribeNearDediveHold))
+	go do(core.NewProuctGroupRiskSubscriber(ctx, client), core.NewPipeline(ctx, session, core.TableName_SubscribeProuctGroupRisk))
 
 	<-done
 }
