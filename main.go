@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/fengdu/websocket-message-deliver/core"
+	"github.com/fengdu/risk-message-deliver/core"
 	"google.golang.org/grpc"
 
 	pb "github.com/fengdu/risk-monitor-server/pb"
@@ -105,7 +105,7 @@ func checkIfRethinkDBReady(rethinkAddr string) *r.Session {
 			}
 			log.Infof("RethinkDB connected successed : %v")
 
-			err = core.CreateDBAndTableAfterDrop(session, *shardsAndReplicas)
+			err = core.CreateDBAndTableIfNotExisted(session, *shardsAndReplicas)
 			if err != nil {
 				log.Errorln(err)
 				session.Close()

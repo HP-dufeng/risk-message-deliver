@@ -39,11 +39,12 @@ func CreateDBAndTableAfterDrop(session *r.Session, shardsAndReplicas int) error 
 	}
 	if existed {
 		log.Infof("DB %s existed, drop it", DbName)
-		_, err = r.DBDrop(DbName).Run(session)
+		res, err := r.DBDrop(DbName).Run(session)
 		if err != nil {
 			log.Errorf("DB %s drop failed", DbName)
 			return err
 		}
+		res.Close()
 	}
 
 	err = createDb(session, DbName)
@@ -163,10 +164,11 @@ func createDbIfNotExisted(session *r.Session, dbName string) error {
 		}
 	}
 	if !existed {
-		_, err = r.DBCreate(dbName).Run(session)
+		res, err := r.DBCreate(dbName).Run(session)
 		if err != nil {
 			return err
 		}
+		res.Close()
 		log.Infof("DB %s created.", dbName)
 
 	} else {
@@ -197,36 +199,46 @@ func createTableIfNotExisted(session *r.Session, tableName string, primaryKey st
 		}
 	}
 	if !existed {
-		_, err = r.TableCreate(tableName, r.TableCreateOpts{PrimaryKey: primaryKey, Shards: shardsAndReplicas, Replicas: shardsAndReplicas}).Run(session)
+		res, err := r.TableCreate(tableName, r.TableCreateOpts{PrimaryKey: primaryKey, Shards: shardsAndReplicas, Replicas: shardsAndReplicas}).Run(session)
 		if err != nil {
 			return err
 		}
+		res.Close()
 		log.Infof("Table %s created.", tableName)
 
 	} else {
 		log.Infof("Table %s existed.", tableName)
 	}
 
+	resDel, errDel := r.Table(tableName).Delete(r.DeleteOpts{Durability: "hard", ReturnChanges: false}).Run(session)
+	if errDel != nil {
+		log.Errorf("Clear data for table %s : %v", tableName, errDel)
+		return errDel
+	}
+	resDel.Close()
+	log.Infof("%s data clear successed", tableName)
 	return nil
 }
 
 func createDb(session *r.Session, dbName string) error {
-	_, err := r.DBCreate(dbName).Run(session)
+	res, err := r.DBCreate(dbName).Run(session)
 	if err != nil {
 		log.Errorf("DB %s created failed : %v", dbName, err)
 		return err
 	}
+	res.Close()
 	log.Infof("DB %s created.", dbName)
 
 	return nil
 }
 
 func createTable(session *r.Session, tableName string, primaryKey string, shardsAndReplicas int) error {
-	_, err := r.TableCreate(tableName, r.TableCreateOpts{PrimaryKey: primaryKey, Shards: shardsAndReplicas, Replicas: shardsAndReplicas}).Run(session)
+	res, err := r.TableCreate(tableName, r.TableCreateOpts{PrimaryKey: primaryKey, Shards: shardsAndReplicas, Replicas: shardsAndReplicas}).Run(session)
 	if err != nil {
 		log.Errorf("Table %s created failed : %v", tableName, err)
 		return err
 	}
+	res.Close()
 	log.Infof("Table %s created.", tableName)
 
 	return nil
