@@ -78,7 +78,7 @@ func (s *pipeline) BufferCount(in <-chan interface{}) <-chan []interface{} {
 	go func() {
 		for {
 			select {
-			case <-time.After(1 * time.Second):
+			case <-time.After(5 * time.Second):
 				bufferTime <- true
 			case <-s.ctx.Done():
 				return
@@ -111,7 +111,7 @@ func (s *pipeline) BufferCount(in <-chan interface{}) <-chan []interface{} {
 
 func (s *pipeline) Write(in <-chan []interface{}) error {
 	for messages := range in {
-		// log.Infof("Write : %v", len(messages))
+		log.Infof("Write %s : %v", s.table, len(messages))
 		res, err := r.Table(s.table).Insert(messages, r.InsertOpts{Durability: "hard", Conflict: "update", ReturnChanges: false}).Run(s.session)
 		if err != nil {
 			log.Error(err)
